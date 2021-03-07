@@ -66,6 +66,10 @@ export class DeviceService {
     }
   }
 
+  public async registerDeviceGroups() {
+    const deviceGroups = await this.wialonService.getAllDeviceGroups();
+  }
+
   protected getLatestDeviceMessageRegister(messages = []): Message {
     return messages.reduce((prev, current) => {
       return prev.messageTime > current.messageTime ? prev : current;

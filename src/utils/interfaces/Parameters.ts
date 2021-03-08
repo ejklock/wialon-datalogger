@@ -1,3 +1,3 @@
 export interface Parameters {
-  [key: string]: number;
+  [key: string]: any;
 }

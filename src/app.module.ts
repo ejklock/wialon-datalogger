@@ -1,3 +1,4 @@
+import { GroupModule } from './group/group.module';
 import { WialonService } from './wialon/service/wialon/wialon.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module, CacheModule } from '@nestjs/common';
@@ -10,7 +11,6 @@ import { DeviceService } from './device/service/device/device.service';
 import { ConfigModule } from '@nestjs/config';
 import { WialonModule } from './wialon/wialon.module';
 import { MessageService } from './message/service/message/message.service';
-import { DevicemessagesModule } from './devicemessages/devicemessages.module';
 import { LatestDeviceMessageModule } from './latestdevicemessage/latestdevicemessage.module';
 import { LatestDeviceMessage } from './latestdevicemessage/entity/latestdevicemessage.entity';
 
@@ -23,8 +23,8 @@ import { LatestDeviceMessage } from './latestdevicemessage/entity/latestdeviceme
     UserModule,
     ConfigModule.forRoot(),
     WialonModule,
-    DevicemessagesModule,
     LatestDeviceMessageModule,
+    GroupModule,
   ],
   controllers: [AppController],
   providers: [AppService, DeviceService, WialonService, MessageService],

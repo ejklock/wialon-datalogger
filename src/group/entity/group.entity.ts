@@ -28,7 +28,7 @@ export class Group {
   @Column({ type: 'int8', unique: true })
   groupID: number;
 
-  @ManyToMany(() => Device, { nullable: true })
+  @ManyToMany(() => Device, { nullable: true, eager: true })
   @JoinTable()
   devices?: Device[];
 }

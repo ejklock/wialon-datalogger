@@ -27,12 +27,19 @@ export class GroupService {
       this.groupRepository,
       deviceGroups,
       'groupID',
-      { doNotUpsert: ['groupdID'] },
+      { doNotUpsert: ['groupdID', 'id'] },
     );
     return upSaved;
   }
 
-  public async syncDevicesFromGroups(groups: Group[]) {
+  public async syncAllDevicesMessagesFromAllGroups() {
+    const groups = await this.getAllSavedGroups();
+    const result = await this.wialonService.getAllMessagesFromGroups(groups);
+    return result;
+  }
+
+  public async syncDevicesFromGroups() {
+    const groups = await this.groupRepository.find();
     const groupsDevices = await this.wialonService.getBatchDevicesFromGroups(
       groups,
     );

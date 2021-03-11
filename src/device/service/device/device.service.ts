@@ -32,7 +32,7 @@ export class DeviceService {
         this.deviceRepository,
         devices,
         'deviceID',
-        { doNotUpsert: ['deviceID'] },
+        { doNotUpsert: ['deviceID', 'id'] },
       );
       return upSaved;
     } catch (error) {

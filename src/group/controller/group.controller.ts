@@ -20,9 +20,14 @@ export class GroupController {
 
   @Get('/syncAllGroupsDevices')
   public async syncDevicesFromGroups() {
-    const groups = await this.groupService.getAllSavedGroups();
+    const devices = await this.groupService.syncDevicesFromGroups();
 
-    const devices = await this.groupService.syncDevicesFromGroups(groups);
+    return devices;
+  }
+
+  @Get('/syncAllGroupsDevicesMessages')
+  public async syncAllDevicesMessagesFromAllGroups() {
+    const devices = await this.groupService.syncAllDevicesMessagesFromAllGroups();
 
     return devices;
   }

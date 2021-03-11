@@ -10,6 +10,7 @@ import { Response as SearchItemResponse } from 'node-wialon/dist/core/search_ite
 import { Parameters } from 'src/utils/interfaces/Parameters';
 import { BatchItemLastMsgPos } from 'src/utils/response/BatchItemLastMsgPos';
 import { Group } from 'src/group/entity/group.entity';
+import { MaskFlags, UnitMessagesFlags } from 'src/utils/enums/MessageTypeFlags';
 @Injectable()
 export class WialonService {
   public wialonApi: Wialon;
@@ -153,6 +154,107 @@ export class WialonService {
     return resp;
   }
 
+  protected prepareBatchMessageLoadIntervalForDevices(devices: Device[]) {
+    const result = devices.map((device) => {
+      return {
+        device,
+        batchMessage: {
+          itemId: device.deviceID,
+          timeFrom: 0,
+          timeTo: 0,
+          flags: 1,
+          flagsMask: 65281,
+          loadCount: 100,
+        },
+      };
+    });
+    return result;
+  }
+
+  public async getAllMessagesFromGroups(groups: Group[]) {
+    await this.authenticate();
+    const result = await Promise.all(
+      groups.map(async (group) => {
+        return {
+          group: group.id,
+          deviceMessages: await Promise.all(
+            group.devices.map(async (device) => {
+              return {
+                device,
+                messages: await this.wialonApi.execute(
+                  'messages/load_interval',
+                  {
+                    itemId: device.deviceID,
+                    timeFrom: 0,
+                    timeTo: 0,
+                    flags: 1,
+                    flagsMask: 65281,
+                    loadCount: 100,
+                  },
+                ),
+              };
+            }),
+          ),
+        };
+      }),
+    );
+    return result;
+  }
+
+  public async getBatchMessagesFromGroups(
+    groups: Group[],
+    lastTime = 0,
+    loadCount = 1000,
+  ) {
+    await this.authenticate();
+    const result = await Promise.all(
+      groups.map(async (group) => {
+        return {
+          group: group.id,
+          deviceMessages: await Promise.all(
+            group.devices.map(async (device) => {
+              return {
+                device,
+                messages: await this.wialonApi.execute('messages/load_last', {
+                  itemId: device.deviceID,
+                  flags: UnitMessagesFlags.MESSAGE_WITH_DATA,
+                  flagsMask: MaskFlags.ALL_MESSAGES_WITH_DATA,
+                  lastCount: 1,
+                  lastTime: lastTime,
+                  loadCount: loadCount,
+                }),
+              };
+            }),
+          ),
+        };
+      }),
+    );
+
+    // const teste = await this.wialonApi.execute('messages/load_last', {
+    //   itemId: 400285459,
+    //   flags: UnitMessagesFlags.MESSAGE_WITH_DATA,
+    //   flagsMask: MaskFlags.ALL_MESSAGES_WITH_DATA,
+    //   lastTime: 0,
+    //   lastCount: 1000,
+    //   loadCount: 1000,
+    // });
+
+    // const result = Promise.all(
+    //   batchCommands.map(async (batchCommand) => {
+    //     return {
+    //       group: batchCommand.group,
+    //       devices: batchCommand.devices,
+    //       result: await this.wialonApi.execute(
+    //         'core/batch',
+    //         batchCommand.batch,
+    //       ),
+    //     };
+    //   }),
+    // );
+
+    return result;
+  }
+
   public async getAllDevices2(flags = UnitFlags.ALL_POSSIBLE_FLAGS_TO_UNIT) {
     await this.authenticate();
     return await this.getAllDeviceGroups();
@@ -230,7 +332,6 @@ export class WialonService {
       loadCount: loadCount,
     });
 
-    console.log(result);
     const { messages } = result;
 
     const mapped = messages.map((m) => {

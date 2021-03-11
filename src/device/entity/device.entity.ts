@@ -12,7 +12,7 @@ export class Device {
   @Column({ type: 'int8' })
   superClassID: number;
 
-  @Column({ type: 'int8' })
+  @Column({ type: 'int8', unique: true })
   deviceID: number;
 
   @Column({ type: 'int8' })

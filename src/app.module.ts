@@ -1,3 +1,4 @@
+import { Group } from 'src/group/entity/group.entity';
 import { GroupModule } from './group/group.module';
 import { WialonService } from './wialon/service/wialon/wialon.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -13,11 +14,12 @@ import { WialonModule } from './wialon/wialon.module';
 import { MessageService } from './message/service/message/message.service';
 import { LatestDeviceMessageModule } from './latestdevicemessage/latestdevicemessage.module';
 import { LatestDeviceMessage } from './latestdevicemessage/entity/latestdevicemessage.entity';
+import { Device } from './device/entity/device.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(),
-    TypeOrmModule.forFeature([LatestDeviceMessage]),
+    TypeOrmModule.forFeature([LatestDeviceMessage, Device]),
     CacheModule.register(),
     DeviceModule,
     UserModule,

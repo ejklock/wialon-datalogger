@@ -562,6 +562,14 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
+"@nest-toolbox/typeorm-upsert@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@nest-toolbox/typeorm-upsert/-/typeorm-upsert-1.4.0.tgz#f56e73b254b4516214f96a2d1cc8a579953cb3df"
+  integrity sha512-22dQqOlyVaPbDBg6tRM7KRfKfUPu0VkRX0K885VlDAbGENM9AsNRSSewnfHwQ6Hae3UiAZIdvaJ9ovf622HMWg==
+  dependencies:
+    rimraf "3.0.2"
+    typeorm "0.2.30"
+
 "@nestjs/bull@^0.3.1":
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/@nestjs/bull/-/bull-0.3.1.tgz#a7f7dba6807fd18a2cfdfd93600857b310b3f8ca"
@@ -6354,6 +6362,28 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
+
+typeorm@0.2.30:
+  version "0.2.30"
+  resolved "https://registry.yarnpkg.com/typeorm/-/typeorm-0.2.30.tgz#a0df2256402cbcdde8049a244437560495ce9b38"
+  integrity sha512-qpr8AO3Phi6ZF7qMHOrRdNisVt8jE1KfmW0ooLFcXscA87aJ12aBPyB9cJfxGNjNwd7B3WIK9ZlBveWiqd74QA==
+  dependencies:
+    "@sqltools/formatter" "1.2.2"
+    app-root-path "^3.0.0"
+    buffer "^5.5.0"
+    chalk "^4.1.0"
+    cli-highlight "^2.1.10"
+    debug "^4.1.1"
+    dotenv "^8.2.0"
+    glob "^7.1.6"
+    js-yaml "^3.14.0"
+    mkdirp "^1.0.4"
+    reflect-metadata "^0.1.13"
+    sha.js "^2.4.11"
+    tslib "^1.13.0"
+    xml2js "^0.4.23"
+    yargonaut "^1.1.2"
+    yargs "^16.0.3"
 
 typeorm@^0.2.31:
   version "0.2.31"

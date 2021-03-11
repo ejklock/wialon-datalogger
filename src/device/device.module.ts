@@ -6,6 +6,7 @@ import { DeviceService } from './service/device/device.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Device } from './entity/device.entity';
 import { LatestDeviceMessage } from 'src/latestdevicemessage/entity/latestdevicemessage.entity';
+import { Group } from 'src/group/entity/group.entity';
 
 @Module({
   imports: [

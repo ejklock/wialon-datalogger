@@ -25,7 +25,7 @@ export class Group {
   })
   items?: Parameters[];
 
-  @Column({ type: 'int8' })
+  @Column({ type: 'int8', unique: true })
   groupID: number;
 
   @ManyToMany(() => Device, { nullable: true })

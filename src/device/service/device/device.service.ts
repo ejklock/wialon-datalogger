@@ -5,7 +5,8 @@ import { Repository } from 'typeorm';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Message } from 'src/message/entity/message.entity';
-
+import { Device } from 'src/device/entity/device.entity';
+import { TypeOrmUpsert } from '@nest-toolbox/typeorm-upsert';
 @Injectable()
 export class DeviceService {
   protected latestRegister: LatestDeviceMessage;
@@ -13,6 +14,8 @@ export class DeviceService {
     private wialonService: WialonService,
     @InjectRepository(LatestDeviceMessage)
     private latestDeviceMessageRepository: Repository<LatestDeviceMessage>,
+    @InjectRepository(Device)
+    private deviceRepository: Repository<Device>,
   ) {}
 
   public async getAllDevices(flags = 1) {
@@ -21,6 +24,20 @@ export class DeviceService {
 
   public async getAllDevices2(flags = 1) {
     return await this.wialonService.getAllDevices2();
+  }
+
+  public async createOrUpdateDevices(devices: Device[]) {
+    try {
+      const upSaved = await TypeOrmUpsert(
+        this.deviceRepository,
+        devices,
+        'deviceID',
+        { doNotUpsert: ['deviceID'] },
+      );
+      return upSaved;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   protected convertToUnixTime(time = new Date()) {
@@ -64,10 +81,6 @@ export class DeviceService {
         latestMessageRegistrationTime: latest,
       });
     }
-  }
-
-  public async registerDeviceGroups() {
-    const deviceGroups = await this.wialonService.getAllDeviceGroups();
   }
 
   protected getLatestDeviceMessageRegister(messages = []): Message {

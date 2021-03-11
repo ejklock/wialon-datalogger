@@ -91,7 +91,8 @@ export class WialonService {
     return deviceGroups;
   }
 
-  protected async getBatchDevicesFromGroup(groups: Group[]) {
+  public async getBatchDevicesFromGroups(groups: Group[]) {
+    await this.authenticate();
     const batch = await Promise.all(
       groups.map(async (group) => {
         try {

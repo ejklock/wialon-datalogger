@@ -1,5 +1,11 @@
 import { Message } from 'src/message/entity/message.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Device {
@@ -13,6 +19,7 @@ export class Device {
   superClassID: number;
 
   @Column({ type: 'int8', unique: true })
+  @Index({ unique: true })
   deviceID: number;
 
   @Column({ type: 'int8' })

@@ -3,10 +3,18 @@ import { UnitDataTransformer } from './../../../utils/TOS/UnitDataTransformer';
 import { UnitFlags } from './../../../utils/enums/UnitFlags';
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
-import { Wialon, UnitGroupsDataFormat, UnitsDataFormat } from 'node-wialon';
+import {
+  Wialon,
+  UnitGroupsDataFormat,
+  UnitsDataFormat,
+  MessagesDataFormat,
+  MessagesLoadIntervalParams,
+} from 'node-wialon';
 import { Device } from 'src/device/entity/device.entity';
 import { Params, Response } from 'node-wialon/dist/core/search_items';
+import { Params as ParamsLoadInterval } from 'node-wialon/dist/messages/load_interval';
 import { Response as SearchItemResponse } from 'node-wialon/dist/core/search_item';
+import { Response as MessageLoadIntervalResponse } from 'node-wialon/dist/messages/load_interval';
 import { Parameters } from 'src/utils/interfaces/Parameters';
 import { BatchItemLastMsgPos } from 'src/utils/response/BatchItemLastMsgPos';
 import { Group } from 'src/group/entity/group.entity';
@@ -17,7 +25,19 @@ export class WialonService {
 
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
+  protected async getActiveSessionsCount() {
+    try {
+      const activeSessions = await this.cacheManager.get<number>(
+        'activeSessionsCount',
+      );
+    } catch (error) {
+      return 0;
+    }
+  }
+
   protected async setSessionIdOnCache(sessionId) {
+    //let activeSessions = await this.getActiveSessionsCount();
+    //await this.cacheManager.set('activeSessionsCount', activeSessions++);
     await this.cacheManager.set('eid', sessionId, { ttl: 120 });
   }
 
@@ -36,6 +56,12 @@ export class WialonService {
 
   protected convertToDate(unixTime: number) {
     return new Date(unixTime * 1000);
+  }
+
+  protected async getNewSession() {
+    return await Wialon.tokenLogin({
+      token: process.env.WIALON_PROD_TOKEN,
+    });
   }
   protected async authenticate() {
     const eid = await this.getSessionIdOnCache();
@@ -154,44 +180,85 @@ export class WialonService {
     return resp;
   }
 
-  protected prepareBatchMessageLoadIntervalForDevices(devices: Device[]) {
+  protected prepareBatchMessageLoadIntervalForDevices(
+    devices: Device[],
+    timeFrom = 0,
+    timeTo = 0,
+    flags = 1,
+    flagsMask = 1,
+    loadCount = 100,
+  ) {
     const result = devices.map((device) => {
       return {
-        device,
-        batchMessage: {
+        svc: 'messages/load_interval',
+        params: {
           itemId: device.deviceID,
-          timeFrom: 0,
-          timeTo: 0,
-          flags: 1,
-          flagsMask: 65281,
-          loadCount: 100,
+          timeFrom,
+          timeTo,
+          flags,
+          flagsMask,
+          loadCount,
         },
       };
     });
     return result;
   }
 
-  public async getAllMessagesFromGroups(groups: Group[]) {
-    await this.authenticate();
-    const result = await Promise.all(
+  public generatePromises = function* (groups: Group[]) {
+    yield* groups.map(async (group) => {
+      return {
+        group,
+        messages: await this.wialonApi.execute(
+          'core/batch',
+          this.prepareBatchMessageLoadIntervalForDevices(group.devices),
+        ),
+      };
+    });
+  };
+
+  public async getAllMessagesFromGroups(
+    groups: Group[],
+    timeFrom = 0,
+    timeTo = 0,
+    flags = 1,
+    flagsMask = 1,
+    loadCount = 4000,
+  ) {
+    const result = Promise.all(
       groups.map(async (group) => {
+        const apiSession = await this.getNewSession();
+        const result = await apiSession.execute<
+          unknown,
+          MessageLoadIntervalResponse<MessagesDataFormat.MessageWithData>[]
+        >(
+          'core/batch',
+          this.prepareBatchMessageLoadIntervalForDevices(
+            group.devices,
+            timeFrom,
+            timeTo,
+            flags,
+            flagsMask,
+            loadCount,
+          ),
+        );
         return {
           group: group.id,
-          deviceMessages: await Promise.all(
-            group.devices.map(async (device) => {
-              return {
-                device,
-                messages: await this.wialonApi.execute(
-                  'messages/load_interval',
-                  {
-                    itemId: device.deviceID,
-                    timeFrom: 0,
-                    timeTo: 0,
-                    flags: 1,
-                    flagsMask: 65281,
-                    loadCount: 100,
-                  },
-                ),
+          devicesList: group.devices.map((device) => {
+            return { id: device.deviceID };
+          }),
+          messages: result.map((r) =>
+            r.messages.map((m) => {
+              return <Message>{
+                messageTime: this.convertToDate(m.t),
+                messageType: m.tp,
+                lat: m.pos?.y,
+                lng: m.pos?.x,
+                alt: m.pos?.z,
+                inputData: m.i,
+                outPutData: m.o,
+                lbsMessageCheckSum: m.lc,
+                messageRegistrationTime: this.convertToDate(m.rt),
+                parameters: m.p,
               };
             }),
           ),
@@ -266,8 +333,6 @@ export class WialonService {
     //     propName: 'rel_billing_account_name',
     //     propValueMask: '*ERPO*',
     //     sortType: 'sys_name',
-    //   },
-    //   force: 1,
     //   flags: 4096,
     //   from: 0,
     //   to: 0,

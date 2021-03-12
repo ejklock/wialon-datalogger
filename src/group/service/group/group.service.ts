@@ -27,7 +27,7 @@ export class GroupService {
       this.groupRepository,
       deviceGroups,
       'groupID',
-      { doNotUpsert: ['groupdID', 'id'] },
+      { doNotUpsert: ['id', 'groupdID'] },
     );
     return upSaved;
   }
@@ -35,6 +35,12 @@ export class GroupService {
   public async syncAllDevicesMessagesFromAllGroups() {
     const groups = await this.getAllSavedGroups();
     const result = await this.wialonService.getAllMessagesFromGroups(groups);
+    // result.map((gd)=>{
+    //   gd.devicesList.forEach((d,i)=>{
+    //     gd.messages[i]=
+    //   })
+    // })
+
     return result;
   }
 

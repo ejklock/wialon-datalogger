@@ -3,6 +3,7 @@ import { Parameters } from 'src/utils/interfaces/Parameters';
 import {
   Column,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
@@ -26,6 +27,7 @@ export class Group {
   items?: Parameters[];
 
   @Column({ type: 'int8', unique: true })
+  @Index({ unique: true })
   groupID: number;
 
   @ManyToMany(() => Device, { nullable: true, eager: true })

@@ -126,7 +126,7 @@ export class WialonService {
     timeTo = 0,
     flags = 1,
     flagsMask = 1,
-    loadCount = 4000,
+    loadCount = 100,
   ) {
     const apiSession = await this.getNewSession();
     const result = await apiSession.execute<

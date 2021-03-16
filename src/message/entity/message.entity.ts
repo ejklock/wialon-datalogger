@@ -3,6 +3,7 @@ import { Parameters } from 'src/utils/interfaces/Parameters';
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -46,10 +47,14 @@ export class Message {
   })
   parameters?: Parameters;
 
+  @Column()
+  @Index({ unique: true })
+  messageHash?: string;
+
   @ManyToOne(() => Device, (device) => device.id, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'deviceId' })
+  @JoinColumn()
   device: Device;
 }

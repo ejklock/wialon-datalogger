@@ -1,3 +1,4 @@
+import { Message } from './message/entity/message.entity';
 import { Group } from 'src/group/entity/group.entity';
 import { GroupModule } from './group/group.module';
 import { WialonService } from './wialon/service/wialon/wialon.service';
@@ -15,11 +16,12 @@ import { MessageService } from './message/service/message/message.service';
 import { LatestDeviceMessageModule } from './latestdevicemessage/latestdevicemessage.module';
 import { LatestDeviceMessage } from './latestdevicemessage/entity/latestdevicemessage.entity';
 import { Device } from './device/entity/device.entity';
+import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(),
-    TypeOrmModule.forFeature([LatestDeviceMessage, Device]),
+    TypeOrmModule.forFeature([LatestDeviceMessage, Device, Message]),
     CacheModule.register(),
     DeviceModule,
     UserModule,
@@ -27,6 +29,7 @@ import { Device } from './device/entity/device.entity';
     WialonModule,
     LatestDeviceMessageModule,
     GroupModule,
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService, DeviceService, WialonService, MessageService],

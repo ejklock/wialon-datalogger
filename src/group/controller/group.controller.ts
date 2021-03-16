@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { Group } from '../entity/group.entity';
 import { GroupService } from '../service/group/group.service';
 
@@ -15,6 +15,12 @@ export class GroupController {
   @Get('/sync')
   public async syncGroups() {
     const result = await this.groupService.syncGroups();
+    return result;
+  }
+
+  @Get('/sync/:id/messages')
+  public async syncGroupMessages(@Param() groupID) {
+    const result = await this.groupService.syncAllMessagesFromGroup(groupID);
     return result;
   }
 

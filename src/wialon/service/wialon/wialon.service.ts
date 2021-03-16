@@ -10,6 +10,8 @@ import {
   MessagesDataFormat,
   MessagesLoadIntervalParams,
 } from 'node-wialon';
+
+import { sha1 } from 'object-hash';
 import { Device } from 'src/device/entity/device.entity';
 import { Params, Response } from 'node-wialon/dist/core/search_items';
 import { Params as ParamsLoadInterval } from 'node-wialon/dist/messages/load_interval';
@@ -116,6 +118,54 @@ export class WialonService {
       };
     });
     return deviceGroups;
+  }
+
+  public async getMessagesFromGroup(
+    group: Group,
+    timeFrom = 0,
+    timeTo = 0,
+    flags = 1,
+    flagsMask = 1,
+    loadCount = 4000,
+  ) {
+    const apiSession = await this.getNewSession();
+    const result = await apiSession.execute<
+      unknown,
+      MessageLoadIntervalResponse<MessagesDataFormat.MessageWithData>[]
+    >(
+      'core/batch',
+      this.prepareBatchMessageLoadIntervalForDevices(
+        group.devices,
+        timeFrom,
+        timeTo,
+        flags,
+        flagsMask,
+        loadCount,
+      ),
+    );
+    return {
+      group: group.id,
+      devicesList: group.devices.map((device) => {
+        return { id: device.deviceID };
+      }),
+      messages: result.map((r) =>
+        r.messages.map((m) => {
+          return <Message>{
+            messageTime: this.convertToDate(m.t),
+            messageType: m.tp,
+            lat: m.pos?.y,
+            lng: m.pos?.x,
+            alt: m.pos?.z,
+            inputData: m.i,
+            outPutData: m.o,
+            lbsMessageCheckSum: m.lc,
+            messageRegistrationTime: this.convertToDate(m.rt),
+            parameters: m.p,
+            messageHash: sha1(m),
+          };
+        }),
+      ),
+    };
   }
 
   public async getBatchDevicesFromGroups(groups: Group[]) {

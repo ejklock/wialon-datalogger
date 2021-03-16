@@ -22,8 +22,34 @@ export class DeviceService {
     return await this.wialonService.getAllDevices();
   }
 
+  public async getDevice(deviceID) {
+    return await this.deviceRepository.findOne(deviceID);
+  }
+
+  public async getDeviceByDeviceID(deviceID) {
+    return await this.deviceRepository.findOne({
+      where: {
+        deviceID,
+      },
+    });
+  }
+
   public async getAllDevices2(flags = 1) {
     return await this.wialonService.getAllDevices2();
+  }
+
+  public async createOrUpdateDevice(device: Device) {
+    try {
+      const upSaved = await TypeOrmUpsert(
+        this.deviceRepository,
+        device,
+        'deviceID',
+        { doNotUpsert: ['deviceID', 'id'] },
+      );
+      return upSaved;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   public async createOrUpdateDevices(devices: Device[]) {

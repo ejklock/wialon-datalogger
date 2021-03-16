@@ -3,6 +3,7 @@ import { Parameters } from 'src/utils/interfaces/Parameters';
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -19,13 +20,13 @@ export class Message {
   @Column()
   messageType: string;
 
-  @Column({ type: 'double precision' })
+  @Column({ type: 'double precision', nullable: true })
   lat: number;
 
-  @Column({ type: 'double precision' })
+  @Column({ type: 'double precision', nullable: true })
   lng: number;
 
-  @Column({ type: 'double precision' })
+  @Column({ type: 'double precision', nullable: true })
   alt: number;
 
   @Column({ type: 'int8', nullable: true })
@@ -34,7 +35,7 @@ export class Message {
   @Column({ type: 'int8', nullable: true })
   outPutData: number;
 
-  @Column()
+  @Column({ type: 'int8', nullable: true })
   lbsMessageCheckSum: number;
 
   @Column()
@@ -46,10 +47,14 @@ export class Message {
   })
   parameters?: Parameters;
 
+  @Column()
+  @Index({ unique: true })
+  messageHash?: string;
+
   @ManyToOne(() => Device, (device) => device.id, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'deviceId' })
+  @JoinColumn()
   device: Device;
 }

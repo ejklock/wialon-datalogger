@@ -8,13 +8,11 @@ import {
   UnitGroupsDataFormat,
   UnitsDataFormat,
   MessagesDataFormat,
-  MessagesLoadIntervalParams,
 } from 'node-wialon';
 
 import { sha1 } from 'object-hash';
 import { Device } from 'src/device/entity/device.entity';
 import { Params, Response } from 'node-wialon/dist/core/search_items';
-import { Params as ParamsLoadInterval } from 'node-wialon/dist/messages/load_interval';
 import { Response as SearchItemResponse } from 'node-wialon/dist/core/search_item';
 import { Response as MessageLoadIntervalResponse } from 'node-wialon/dist/messages/load_interval';
 import { Parameters } from 'src/utils/interfaces/Parameters';
@@ -126,7 +124,7 @@ export class WialonService {
     timeTo = 0,
     flags = 1,
     flagsMask = 1,
-    loadCount = 100,
+    loadCount = 1000,
   ) {
     const apiSession = await this.getNewSession();
     const result = await apiSession.execute<
@@ -135,7 +133,7 @@ export class WialonService {
     >(
       'core/batch',
       this.prepareBatchMessageLoadIntervalForDevices(
-        group.devices,
+        group?.devices,
         timeFrom,
         timeTo,
         flags,
@@ -243,7 +241,9 @@ export class WialonService {
         svc: 'messages/load_interval',
         params: {
           itemId: device.deviceID,
-          timeFrom,
+          timeFrom: device.latestMessageTime
+            ? device.latestMessageTime.getLinuxTime()
+            : timeFrom,
           timeTo,
           flags,
           flagsMask,
@@ -251,20 +251,9 @@ export class WialonService {
         },
       };
     });
+
     return result;
   }
-
-  public generatePromises = function* (groups: Group[]) {
-    yield* groups.map(async (group) => {
-      return {
-        group,
-        messages: await this.wialonApi.execute(
-          'core/batch',
-          this.prepareBatchMessageLoadIntervalForDevices(group.devices),
-        ),
-      };
-    });
-  };
 
   public async getAllMessagesFromGroups(
     groups: Group[],
@@ -370,51 +359,6 @@ export class WialonService {
     // );
 
     return result;
-  }
-
-  public async getAllDevices2(flags = UnitFlags.ALL_POSSIBLE_FLAGS_TO_UNIT) {
-    await this.authenticate();
-    return await this.getAllDeviceGroups();
-
-    // //const result = await this.wialonApi.Utils.getUnits({ flags });
-    // const res = await this.wialonApi.execute('core/search_items', {
-    //   spec: {
-    //     itemsType: 'avl_unit',
-    //     propName: 'rel_billing_account_name',
-    //     propValueMask: '*ERPO*',
-    //     sortType: 'sys_name',
-    //   flags: 4096,
-    //   from: 0,
-    //   to: 0,
-    // });
-
-    // const test = await this.wialonApi.Core.batch({
-    //   svc: 'messages/load_interval',
-    //   params: [
-    //     {
-    //       itemId: 400281714,
-    //       timeFrom: 0,
-    //       timeTo: 0,
-    //       flagsMask: 0,
-    //       loadCount: 100,
-    //     },
-    //     {
-    //       itemId: 400285459,
-    //       timeFrom: 0,
-    //       timeTo: 0,
-    //       flagsMask: 0,
-    //       loadCount: 100,
-    //     },
-    //     {
-    //       itemId: 400286161,
-    //       timeFrom: 0,
-    //       timeTo: 0,
-    //       flagsMask: 0,
-    //       loadCount: 100,
-    //     },
-    //   ],
-    //   flag: 0,
-    // });
   }
 
   public async getAllDevices(

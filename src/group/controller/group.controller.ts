@@ -1,4 +1,10 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  Param,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Group } from '../entity/group.entity';
 import { GroupService } from '../service/group/group.service';
 
@@ -6,6 +12,7 @@ import { GroupService } from '../service/group/group.service';
 export class GroupController {
   constructor(private groupService: GroupService) {}
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
   public async index(): Promise<Group[]> {
     const groups = await this.groupService.getAllSavedGroups();
@@ -27,14 +34,6 @@ export class GroupController {
   @Get('/syncAllGroupsDevices')
   public async syncDevicesFromGroups() {
     const devices = await this.groupService.syncDevicesFromGroups();
-
-    return devices;
-  }
-
-  @Get('/syncAllGroupsDevicesMessages')
-  public async syncAllDevicesMessagesFromAllGroups() {
-    const devices = await this.groupService.syncAllDevicesMessagesFromAllGroups();
-
     return devices;
   }
 }

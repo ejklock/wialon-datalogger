@@ -34,10 +34,6 @@ export class DeviceService {
     });
   }
 
-  public async getAllDevices2(flags = 1) {
-    return await this.wialonService.getAllDevices2();
-  }
-
   public async createOrUpdateDevice(device: Device) {
     try {
       const upSaved = await TypeOrmUpsert(

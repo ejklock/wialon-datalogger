@@ -23,6 +23,10 @@ export class GroupService {
     return groups;
   }
 
+  public async getGroupById(groupID) {
+    return await this.groupRepository.findOne(groupID);
+  }
+
   public async syncGroups() {
     const deviceGroups = await this.wialonService.getAllDeviceGroups();
     const upSaved = await TypeOrmUpsert(
@@ -35,44 +39,9 @@ export class GroupService {
   }
 
   public async syncAllMessagesFromGroup(groupID) {
-    const group = await this.groupRepository.findOne(groupID);
-    const groupDevicesMessages = await this.wialonService.getMessagesFromGroup(
-      group,
-    );
-
-    const result = Promise.all(
-      groupDevicesMessages.devicesList.map(async (d, i) => {
-        const device = await this.deviceService.getDeviceByDeviceID(d.id);
-        const deviceMessages = groupDevicesMessages.messages[i].map((m) => {
-          return {
-            device: device.id,
-            ...m,
-          };
-        });
-
-        const saved = await this.messageService.createOrUpdateMessages(
-          deviceMessages,
-        );
-        return {
-          device: device,
-          createdOrUpdatedMessages: saved.length,
-        };
-      }),
-    );
-
+    const group = await this.getGroupById(groupID);
+    const result = await this.messageService.syncAllMessagesFromGroup(group);
     return result;
-  }
-
-  public async syncAllDevicesMessagesFromAllGroups() {
-    // const groups = await this.getAllSavedGroups();
-    // const result = await this.wialonService.getAllMessagesFromGroups(groups);
-    // // result.map((gd)=>{
-    // //   gd.devicesList.forEach((d,i)=>{
-    // //     gd.messages[i]=
-    // //   })
-    // // })
-
-    return await this.syncAllMessagesFromGroup('asas');
   }
 
   public async syncDevicesFromGroups() {

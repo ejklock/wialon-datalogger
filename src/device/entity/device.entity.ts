@@ -1,9 +1,11 @@
+import { LatestDeviceMessage } from 'src/latestdevicemessage/entity/latestdevicemessage.entity';
 import { Message } from 'src/message/entity/message.entity';
 import {
   Column,
   Entity,
   Index,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -51,4 +53,11 @@ export class Device {
 
   @OneToMany(() => Message, (message) => message.device)
   measures: Message[];
+
+  @OneToOne(
+    () => LatestDeviceMessage,
+    (latestDeviceMessage) => latestDeviceMessage.device,
+    { eager: true },
+  )
+  latestMessageTime: LatestDeviceMessage;
 }

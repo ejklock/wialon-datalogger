@@ -1,5 +1,6 @@
 import { Device } from 'src/device/entity/device.entity';
 import { Parameters } from 'src/utils/interfaces/Parameters';
+import { Exclude } from 'class-transformer';
 import {
   Column,
   Entity,
@@ -20,6 +21,7 @@ export class Group {
   @Column({ type: 'int8' })
   superClassID: number;
 
+  @Exclude()
   @Column({
     type: 'jsonb',
     nullable: true,

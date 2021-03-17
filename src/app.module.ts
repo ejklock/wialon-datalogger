@@ -6,7 +6,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module, CacheModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { BullModule } from '@nestjs/bull';
 import { DeviceModule } from './device/device.module';
 import { UserModule } from './user/user.module';
 import { DeviceService } from './device/service/device/device.service';

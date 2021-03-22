@@ -61,17 +61,21 @@ export class MessageService {
   protected async saveLatestMessagesFromDevices(
     syncMessagesFromGroupResponse: SyncMessagesFromGroupResponse[],
   ) {
-    const latestDevicesMessages = syncMessagesFromGroupResponse.map((s) => {
-      return <LatestDeviceMessage>{
-        device: s.device,
-        latestMessageTime: LatestDeviceMessage.convertToDate(
-          s.highestMessageTime,
-        ),
-        latestMessageRegistrationTime: LatestDeviceMessage.convertToDate(
-          s.highestMessageRegistrationTime,
-        ),
-      };
-    });
+    const latestDevicesMessages = syncMessagesFromGroupResponse
+      .map((s) => {
+        if (s.newSynchronizedMessages !== 0) {
+          return <LatestDeviceMessage>{
+            device: s.device,
+            latestMessageTime: LatestDeviceMessage.convertToDate(
+              s.highestMessageTime,
+            ),
+            latestMessageRegistrationTime: LatestDeviceMessage.convertToDate(
+              s.highestMessageRegistrationTime,
+            ),
+          };
+        }
+      })
+      .filter((item) => item);
     await this.createOrUpdateLatestDeviceMessages(latestDevicesMessages);
   }
 
@@ -79,8 +83,12 @@ export class MessageService {
     const groupDevicesMessages = await this.getAllMessagesFromGroup(group);
     const result = await Promise.all(
       groupDevicesMessages.devicesList.map(async (d, i) => {
+        let maxMT = [];
+        let maxMRT = [];
         const device = await this.deviceService.getDeviceByDeviceID(d.id);
         const deviceMessages = groupDevicesMessages.messages[i].map((m) => {
+          maxMT = [...maxMT, m.messageRegistrationTime.getTime() / 1000];
+          maxMRT = [...maxMRT, m.messageRegistrationTime.getTime() / 1000];
           return {
             device: device.id,
             ...m,
@@ -91,16 +99,8 @@ export class MessageService {
 
         return {
           device: device,
-          highestMessageTime: Math.max(
-            ...deviceMessages.map((a) => {
-              return a.messageTime.getTime() / 1000;
-            }),
-          ),
-          highestMessageRegistrationTime: Math.max(
-            ...deviceMessages.map((a) => {
-              return a.messageRegistrationTime.getTime() / 1000;
-            }),
-          ),
+          highestMessageTime: Math.max(...maxMT) || null,
+          highestMessageRegistrationTime: Math.max(...maxMRT) || null,
           newSynchronizedMessages: saved,
         };
       }),

@@ -1,6 +1,6 @@
 import { WialonService } from './../../../wialon/service/wialon/wialon.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Group } from 'src/group/entity/group.entity';
 import { Repository } from 'typeorm';
 import { TypeOrmUpsert } from '@nest-toolbox/typeorm-upsert';
@@ -9,11 +9,13 @@ import { MessageService } from 'src/message/service/message/message.service';
 
 @Injectable()
 export class GroupService {
+  private readonly logger = new Logger(GroupService.name);
   protected saveds = [];
   constructor(
     private wialonService: WialonService,
     private deviceService: DeviceService,
     private messageService: MessageService,
+
     @InjectRepository(Group)
     private groupRepository: Repository<Group>,
   ) {}

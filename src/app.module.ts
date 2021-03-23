@@ -1,5 +1,4 @@
 import { Message } from './message/entity/message.entity';
-import { Group } from 'src/group/entity/group.entity';
 import { GroupModule } from './group/group.module';
 import { WialonService } from './wialon/service/wialon/wialon.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -16,9 +15,13 @@ import { LatestDeviceMessageModule } from './latestdevicemessage/latestdevicemes
 import { LatestDeviceMessage } from './latestdevicemessage/entity/latestdevicemessage.entity';
 import { Device } from './device/entity/device.entity';
 import { MessageModule } from './message/message.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { GrouptaskModule } from './grouptask/grouptask.module';
+import { ScheduleModule as ScheduleM } from './schedule/schedule.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot(),
     TypeOrmModule.forFeature([LatestDeviceMessage, Device, Message]),
     CacheModule.register(),
@@ -29,6 +32,8 @@ import { MessageModule } from './message/message.module';
     LatestDeviceMessageModule,
     GroupModule,
     MessageModule,
+    GrouptaskModule,
+    ScheduleM,
   ],
   controllers: [AppController],
   providers: [AppService, DeviceService, WialonService, MessageService],

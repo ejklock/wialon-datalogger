@@ -24,9 +24,12 @@ services:
       dockerfile: Dockerfile
     image: wialon-api
     container_name: wialon-api
+    logging:
+      options:
+        max-size: 10m
     depends_on:
       - db
-    command: sh -c "/wait && yarn start:dev"
+    command: sh -c "/wait && yarn install --frozen-lockfile && yarn start:prod"
     environment:
       - WAIT_HOSTS=db:5432
       - WAIT_HOSTS_TIMEOUT=300
@@ -40,14 +43,6 @@ services:
       - '3333:3333'
     volumes:
       - ./:/usr/src/app
-    networks:
-      - wialonNetwork
-  redis:
-    image: redis:5.0.5-alpine
-    ports:
-      - '127.0.0.1:6379:6379'
-    volumes:
-      - ./volumes/redis_data:/data
     networks:
       - wialonNetwork
 volumes:
